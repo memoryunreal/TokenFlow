@@ -1,19 +1,23 @@
 # general
 seed: 1
 device: 'cuda'
-output_path: 'tokenflow-results'
+output_path: 'results/tokenflow-results'
 
 # data
-data_path: 'data/woman-running'
-latents_path: 'latents' # should be the same as 'save_dir' arg used in preprocess
+# data_path: 'data/woman-running'
+# data_path: 'data/car-turn'
+data_path: 'data/wolf'
+latents_path: '/home/lizhe/paper/StableVideo/result/tokenflow/' # should be the same as 'save_dir' arg used in preprocess
 n_inversion_steps: 500 # for retrieving the latents of the inversion
 n_frames: 40
 
 # diffusion
-sd_version: '2.1'
+sd_version: '1.5'
 guidance_scale: 7.5
 n_timesteps: 50
-prompt: "a marble sculpture of a woman running, Venus de Milo"
+# prompt: "a marble sculpture of a woman running, Venus de Milo"
+# prompt: "A sliver airplane running on the roadd"
+prompt: "A sks dog looks around"
 negative_prompt: "ugly, blurry, low res, unrealistic, unaesthetic"
 batch_size: 8
 

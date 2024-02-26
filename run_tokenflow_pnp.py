@@ -31,11 +31,13 @@ class TokenFlow(nn.Module):
         sd_version = config["sd_version"]
         self.sd_version = sd_version
         if sd_version == '2.1':
-            model_key = "stabilityai/stable-diffusion-2-1-base"
+            # model_key = "stabilityai/stable-diffusion-2-1-base"
+            model_key = "stabilityai/stable-diffusion-2-1"
         elif sd_version == '2.0':
             model_key = "stabilityai/stable-diffusion-2-base"
         elif sd_version == '1.5':
-            model_key = "runwayml/stable-diffusion-v1-5"
+            # model_key = "runwayml/stable-diffusion-v1-5"
+            model_key = "runwayml/dog-1.5"
         elif sd_version == 'depth':
             model_key = "stabilityai/stable-diffusion-2-depth"
         else:
@@ -263,12 +265,28 @@ class TokenFlow(nn.Module):
 
     def sample_loop(self, x, indices):
         os.makedirs(f'{self.config["output_path"]}/img_ode', exist_ok=True)
+        os.makedirs(f'{self.config["output_path"]}/img_mask_wh', exist_ok=True)
         for i, t in enumerate(tqdm(self.scheduler.timesteps, desc="Sampling")):
                 x = self.batched_denoise_step(x, t, indices)
         
-        decoded_latents = self.decode_latents(x)
+        ###
+        # mask generation
+        ###
+        mask = torch.from_numpy(np.load('/home/lizhe/paper/StableVideo/TokenFlow/data/wolf_mask.npy'))
+        mask = mask.to('cuda:0')
+        mask = mask.to(torch.float16)
+        mask_invert = torch.where(mask==0,1,0)
+        merge_latent = torch.mul(x, mask) + torch.mul(self.latents, mask_invert)
+
+        decoded_latents = self.decode_latents(merge_latent)
+        ###
+        # mask generation
+        ### 
+
+        # decoded_latents = self.decode_latents(x)
         for i in range(len(decoded_latents)):
-            T.ToPILImage()(decoded_latents[i]).save(f'{self.config["output_path"]}/img_ode/%05d.png' % i)
+            # T.ToPILImage()(decoded_latents[i]).save(f'{self.config["output_path"]}/img_ode/%05d.png' % i)
+            T.ToPILImage()(decoded_latents[i]).save(f'{self.config["output_path"]}/img_mask_wh/%05d.png' % i)
 
         return decoded_latents
 
